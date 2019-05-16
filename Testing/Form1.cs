@@ -32,7 +32,10 @@ namespace WindowsFormsApp1
         {
 
             InitializeComponent();
-
+            #region 添加启动日志 Srz
+            logNetStart = new LogNetSingle("StartLog.txt");
+            logNetStart.RecordMessage(HslMessageDegree.DEBUG, null, "程序启动"+DateTime.Now.ToString());
+            #endregion
             //if (result.IsSuccess)
             //{
             //    s7Net.ReadByte("DB0.0");
@@ -42,6 +45,7 @@ namespace WindowsFormsApp1
             //}
 
         }
+        private ILogNet logNetStart;
         private ILogNet logNet;
         private ILogNet logNet2;
         private ILogNet LogNetFloat;
