@@ -55,10 +55,11 @@ namespace WindowsFormsApp1
         private List<HistoryData> _hdaStr;
         private List<HistoryData> _hdaFloat;
         private List<HistoryData> _hdaBit;
-
+        private List<ThreadingTest> threadingTests;
 
         private void CSLInit()
         {
+         
             logNet = new LogNetSingle("log.txt");
 
             Txt_Recieve.Text = "";
@@ -151,6 +152,7 @@ namespace WindowsFormsApp1
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            threadingTests = new List<ThreadingTest>();
             _hdaInt16 = new List<HistoryData>();
             _hdaInt32 = new List<HistoryData>();
             _hdaStr = new List<HistoryData>();
@@ -186,7 +188,8 @@ namespace WindowsFormsApp1
                 bool isopen = _LIBnodavePLC.Init(txt_straddr.Text, Txt_IP.Text); ;
               
                 string send = "";
-                string recive = ""; ;
+                string recive = "";
+                bool check = false;
                 Task.Run(() =>
                 {
                     while (true)
@@ -195,9 +198,12 @@ namespace WindowsFormsApp1
                                     send = GetRandomString(length);
                                 _LIBnodavePLC.WriteBytes(SoftBasic.HexStringToBytes(send));
                         byte[] ReciveData = _LIBnodavePLC.ReadBytes(send.Length / 2);
-                            recive= SoftBasic.ByteToHexString(ReciveData);                                                                                        
-                            bool check = Check(recive, send);
-                            double during = (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds;
+                            recive= SoftBasic.ByteToHexString(ReciveData);
+                        if (send.CompareTo(recive) == 0)
+                            check = true;
+                        else
+                            check = false;
+                        double during = (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds;
                             logNet2.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + send.Length.ToString() + "是否正常" + check);
 
                             _hdaStr.Add(new HistoryData(during, send.Length, check, DateTime.Now));
@@ -328,7 +334,7 @@ namespace WindowsFormsApp1
             int _Lenth = floats.Length;
             int ERROR = 0;
             string recive = null;
-            string send = null;
+            //string send = null;
             bool check= false;
             LogNetFloat = new LogNetSingle("FloatDataLog.txt");
             ThreadState1 = true;
@@ -388,13 +394,7 @@ namespace WindowsFormsApp1
 
         }
 
-        private void start()
-        {
-
-
-
-        }
-
+  
         private void AsyncInt32Start(LIBnodavePLC lIBnodavePLC,int _Length)
         {
             //if (ThreadState2)
@@ -571,73 +571,6 @@ namespace WindowsFormsApp1
 
         //}
 
-        //private void AsyncStart(LIBnodavePLC lIBnodavePLC, IEnumerable sendbyte)
-        //{
-        //    if (ThreadState)
-        //    {
-
-        //        return;
-        //    }
-        ////string typename=    
-       
-        //    int ERROR = 0;
-        //    string send = null;
-        //    string recive = null;
-        //    string log = string.Format("Int16DataLog.txt");
-        //    LogNetInt16 = new LogNetSingle(log);
-        //    ThreadState = true;
-        //    Task task = new Task(() =>
-        //    {
-        //        Int16 _value = 1;
-        //        while (true)
-        //        {
-        //            if (sendbyte != null)
-        //            {
-        //                Thread.Sleep(10);
-        //                lIBnodavePLC.WriteInt16s(GetRandomInt16(1500));
-        //                lIBnodavePLC.ReadInt16s(sendbyte.Length);
-        //                foreach (var item in lIBnodavePLC.Int16s)
-        //                {
-        //                    recive += item.ToString() + ";";
-        //                }
-        //                foreach (var item in sendbyte)
-        //                {
-        //                    send += item.ToString() + ";";
-        //                }
-
-        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + sendbyte.Length.ToString() + "是否正常" + Check(recive, send));
-
-        //            }
-
-        //            else
-        //            {
-        //                _value++;
-        //                lIBnodavePLC.WriteInt16(_value);
-        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
-        //                recive = lIBnodavePLC.ReadInt16().ToString();
-        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
-        //                if (_value.ToString() != recive.ToString())
-        //                {
-        //                    ERROR++;
-        //                }
-        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
-        //                if (_value > 100)
-        //                {
-        //                    _value = 0;
-        //                }
-        //            }
-
-        //        }
-
-
-
-        //    });
-
-        //    task.Start();
-
-
-
-        //}
 
 
         private void AsyncInt16Start(LIBnodavePLC lIBnodavePLC, int Length)
@@ -650,7 +583,7 @@ namespace WindowsFormsApp1
             short[] sendbyte = null;
             int ERROR = 0;
             bool check = false;
-            string send = null;
+           // string send = null;
             string recive = null;
             string log = string.Format("Int16DataLog.txt");
             LogNetInt16 = new LogNetSingle(log);
@@ -766,7 +699,7 @@ namespace WindowsFormsApp1
             {
                 return;
             }
-          Task.Run(()=>  AsyncStrStart(6000));
+            Task.Run(() => threadingTests.Add(new ThreadingTest(3000, txt_straddr.Text, "192.168.0.1", comm.DataTyte.STRING)));
         }
 
 
@@ -795,12 +728,13 @@ namespace WindowsFormsApp1
 
                 return;
             }
-            Task.Run(() => AsyncInt16Start(Connect(txt_int16addr.Text),1500));
-           
-            
+            Task.Run(() => threadingTests.Add(new ThreadingTest(150, txt_int16addr.Text, "192.168.0.1", comm.DataTyte.INT16)));
+
+
+
         }
 
-       
+
 
         private void Btn_FloatTest_Click(object sender, EventArgs e)
         {
@@ -808,19 +742,21 @@ namespace WindowsFormsApp1
             {
                 return;
             }
-            Task.Run(()=> AsyncFloatStart(Connect(txt_faddr.Text),GetRandomfloat(750))
-            );
+      Task.Run(
+           ()=> threadingTests.Add(new ThreadingTest(750, txt_faddr.Text, "192.168.0.1",comm.DataTyte.REAL))
+          
+            );//  Task.Run(()=> AsyncFloatStart(Connect(txt_faddr.Text),GetRandomfloat(750))
+         
         }
 
 
         private void Btn_Int32Test_Click(object sender, EventArgs e)
         {
-            if (ThreadState2)
-            {
+    
+           
 
-                return;
-            }
-           Task.Run (()=>AsyncInt32Start( Connect(txt_int32addr.Text), 750));
+            Task.Run (() => threadingTests.Add(new ThreadingTest(750, txt_int32addr.Text, "192.168.0.1", comm.DataTyte.DINT32)));
+
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -836,7 +772,16 @@ namespace WindowsFormsApp1
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            start(new Func<short[]>(()=> GetRandomInt16(750)));
+            //起始块
+            int j = 9;
+            for (int i = 0; i < 10; i++)
+            {
+                j++;
+                threadingTests.Add(new ThreadingTest(3000, "DB"+ j.ToString()+','+"DBD0" , Txt_IP.Text, comm.DataTyte.STRING,j.ToString()));
+            }
+        
+           
+
         }
         private void SaveData<T>(string TableName,List<T> ts)
         {
@@ -885,24 +830,67 @@ namespace WindowsFormsApp1
         {
             try
             {
-              
-                    if (_hdaFloat.Count > comm.MaxCount)
-                    {
-                    Task.Run(() => SaveData<HistoryData>("HistoryData_real", _hdaFloat));                     
-                    }
-
-                    if(_hdaInt16.Count> comm.MaxCount)
-                    {
-                    Task.Run(() => SaveData<HistoryData>("HistoryData_Int16", _hdaInt16));
-                    }
-                    if (_hdaInt32.Count > comm.MaxCount)
-                    {
-                        Task.Run(() => SaveData<HistoryData>("HistoryData_Int32", _hdaInt32));
-                    }
-                if (_hdaStr.Count > comm.MaxCount)
+                if (threadingTests!=null)
                 {
-                    Task.Run(() => SaveData<HistoryData>("HistoryData_Str", _hdaStr));
+
+                    foreach (var item in threadingTests)
+                    {
+                        if (item.ListData.Count > comm.MaxCount)
+                        { 
+                            switch (item.DataTyte)
+                            {
+                                case comm.DataTyte.BOOL:
+
+                                    break;
+                                case comm.DataTyte.WORD:
+
+                                    SaveData<HistoryData>("HistoryData_Word" + item.ThreadCount, item.ListData);
+                                    break;
+                                case comm.DataTyte.INT16:
+
+                                    SaveData<HistoryData>("HistoryData_Int16" + item.ThreadCount, item.ListData);
+                                    break;
+                                case comm.DataTyte.DINT32:
+                                    SaveData<HistoryData>("HistoryData_Int32" + item.ThreadCount, item.ListData);
+                                    break;
+                                case comm.DataTyte.REAL:
+                                    SaveData<HistoryData>("HistoryData_real" + item.ThreadCount, item.ListData);
+                                    break;
+                                case comm.DataTyte.STRING:
+                                    SaveData<HistoryData>("HistoryData_str" + item.ThreadCount, item.ListData);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+
+
+                        //if (item.ListData.Count > comm.MaxCount)
+                        //{                        
+                        //    SaveData<HistoryData>("HistoryData_str" + item.ThreadCount, item.ListData);
+                        //}
+                    }
                 }
+            
+              
+                //    if (_hdaFloat.Count > comm.MaxCount)
+                //    {
+                //     SaveData<HistoryData>("HistoryData_real", _hdaFloat);                     
+                //    }
+
+                //    if(_hdaInt16.Count> comm.MaxCount)
+                //    {
+                //  SaveData<HistoryData>("HistoryData_Int16", _hdaInt16);
+                //    }
+                //    if (_hdaInt32.Count > comm.MaxCount)
+                //    {
+                //        SaveData<HistoryData>("HistoryData_Int32", _hdaInt32);
+                //    }
+                //if (_hdaStr.Count > comm.MaxCount)
+                //{
+                // SaveData<HistoryData>("HistoryData_Str", _hdaStr);
+                //}
 
             }
             catch (Exception)
@@ -917,6 +905,14 @@ namespace WindowsFormsApp1
         private void Txt_faddr_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void Btn_word_Click(object sender, EventArgs e)
+        {
+            Task.Run(
+
+          ()=>  threadingTests.Add(new ThreadingTest(1500, txt_wordaddr.Text, "192.168.0.1", comm.DataTyte.WORD))
+            );
         }
     }
 }

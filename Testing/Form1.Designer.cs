@@ -47,6 +47,9 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btn_word = new System.Windows.Forms.Button();
+            this.txt_wordaddr = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.txt_straddr = new System.Windows.Forms.TextBox();
             this.txt_bitaddr = new System.Windows.Forms.TextBox();
@@ -64,7 +67,7 @@
             this.Txt_IP.Name = "Txt_IP";
             this.Txt_IP.Size = new System.Drawing.Size(103, 21);
             this.Txt_IP.TabIndex = 1;
-            this.Txt_IP.Text = "192.168.0.1";
+            this.Txt_IP.Text = "172.17.209.12";
             // 
             // userLantern1
             // 
@@ -87,7 +90,7 @@
             // 
             // Txt_Recieve
             // 
-            this.Txt_Recieve.Location = new System.Drawing.Point(246, 397);
+            this.Txt_Recieve.Location = new System.Drawing.Point(622, 403);
             this.Txt_Recieve.Multiline = true;
             this.Txt_Recieve.Name = "Txt_Recieve";
             this.Txt_Recieve.Size = new System.Drawing.Size(475, 75);
@@ -97,7 +100,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("宋体", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(106, 397);
+            this.label1.Location = new System.Drawing.Point(482, 403);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(111, 24);
             this.label1.TabIndex = 8;
@@ -107,7 +110,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("宋体", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(106, 303);
+            this.label2.Location = new System.Drawing.Point(482, 309);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(111, 24);
             this.label2.TabIndex = 9;
@@ -115,7 +118,7 @@
             // 
             // Txt_Send
             // 
-            this.Txt_Send.Location = new System.Drawing.Point(246, 303);
+            this.Txt_Send.Location = new System.Drawing.Point(622, 309);
             this.Txt_Send.Multiline = true;
             this.Txt_Send.Name = "Txt_Send";
             this.Txt_Send.Size = new System.Drawing.Size(475, 68);
@@ -216,6 +219,9 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btn_word);
+            this.groupBox1.Controls.Add(this.txt_wordaddr);
+            this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.txt_straddr);
             this.groupBox1.Controls.Add(this.txt_bitaddr);
@@ -243,19 +249,46 @@
             this.groupBox1.Text = "groupBox1";
             this.groupBox1.Enter += new System.EventHandler(this.GroupBox1_Enter);
             // 
+            // btn_word
+            // 
+            this.btn_word.Location = new System.Drawing.Point(494, 231);
+            this.btn_word.Name = "btn_word";
+            this.btn_word.Size = new System.Drawing.Size(78, 37);
+            this.btn_word.TabIndex = 30;
+            this.btn_word.Text = "WordTest";
+            this.btn_word.UseVisualStyleBackColor = true;
+            this.btn_word.Click += new System.EventHandler(this.Btn_word_Click);
+            // 
+            // txt_wordaddr
+            // 
+            this.txt_wordaddr.Location = new System.Drawing.Point(368, 240);
+            this.txt_wordaddr.Name = "txt_wordaddr";
+            this.txt_wordaddr.Size = new System.Drawing.Size(103, 21);
+            this.txt_wordaddr.TabIndex = 29;
+            this.txt_wordaddr.Text = "DB4,DBD0";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(305, 249);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(47, 12);
+            this.label10.TabIndex = 28;
+            this.label10.Text = "PLC地址";
+            // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(47, 184);
+            this.button1.Location = new System.Drawing.Point(31, 134);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(151, 37);
             this.button1.TabIndex = 27;
-            this.button1.Text = "Test";
+            this.button1.Text = "多线程测试";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
             // txt_straddr
             // 
-            this.txt_straddr.Location = new System.Drawing.Point(368, 187);
+            this.txt_straddr.Location = new System.Drawing.Point(368, 193);
             this.txt_straddr.Name = "txt_straddr";
             this.txt_straddr.Size = new System.Drawing.Size(103, 21);
             this.txt_straddr.TabIndex = 26;
@@ -280,7 +313,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(305, 196);
+            this.label9.Location = new System.Drawing.Point(305, 202);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(47, 12);
             this.label9.TabIndex = 23;
@@ -312,7 +345,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(844, 541);
+            this.ClientSize = new System.Drawing.Size(1131, 673);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.Txt_Send);
             this.Controls.Add(this.label2);
@@ -357,6 +390,9 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btn_word;
+        private System.Windows.Forms.TextBox txt_wordaddr;
+        private System.Windows.Forms.Label label10;
     }
 }
 
