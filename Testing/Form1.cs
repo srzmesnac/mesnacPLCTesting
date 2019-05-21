@@ -61,73 +61,74 @@ namespace WindowsFormsApp1
         private List<HistoryData> _hdaBit;
         private List<ThreadingTest> threadingTests;
 
-        private void CSLInit()
-        {
+        //
+        //private void CSLInit()
+        //{
          
-            logNet = new LogNetSingle("log.txt");
+        //    logNet = new LogNetSingle("log.txt");
 
-            Txt_Recieve.Text = "";
-            s7Net = new SiemensS7Net(SiemensPLCS.S300, Txt_IP.Text);
-            s7Net.ConnectTimeOut = 3000;
-            Task.Run(() =>
-            {
-                result = s7Net.ConnectServer();
-                if (result.IsSuccess)
-                {
-                    userLantern1.LanternBackground = Color.Green;
-                }
-                else
-                {
-                    userLantern1.LanternBackground = Color.Red;
+        //    Txt_Recieve.Text = "";
+        //    s7Net = new SiemensS7Net(SiemensPLCS.S300, Txt_IP.Text);
+        //    s7Net.ConnectTimeOut = 3000;
+        //    Task.Run(() =>
+        //    {
+        //        result = s7Net.ConnectServer();
+        //        if (result.IsSuccess)
+        //        {
+        //            userLantern1.LanternBackground = Color.Green;
+        //        }
+        //        else
+        //        {
+        //            userLantern1.LanternBackground = Color.Red;
 
-                }
-            }
-            );
-            Thread.Sleep(1000);
-            Random random = new Random();
-            string SendAddr = txt_faddr.Text = "DB1.0";
-            OperateResult<byte[]> ReadResult = null;
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    //Thread.Sleep(5);
+        //        }
+        //    }
+        //    );
+        //    Thread.Sleep(1000);
+        //    Random random = new Random();
+        //    string SendAddr = txt_faddr.Text = "DB1.0";
+        //    OperateResult<byte[]> ReadResult = null;
+        //    Task.Run(() =>
+        //    {
+        //        while (true)
+        //        {
+        //            //Thread.Sleep(5);
 
-                    this.Invoke(new Action(() =>
-                    {
-                        lock (this)
-                        {
+        //            this.Invoke(new Action(() =>
+        //            {
+        //                lock (this)
+        //                {
 
-                            Txt_Send.Text = GetRandomString(6000);
-                        }
+        //                    Txt_Send.Text = GetRandomString(6000);
+        //                }
 
-                    }
-              ));
-                    s7Net.Write(SendAddr, SoftBasic.HexStringToBytes(Txt_Send.Text));
-                    logNet.RecordMessage(HslMessageDegree.DEBUG, null, "写入" + Txt_Send.Text);
-                    //接受最多3000个字节
-                    ReadResult = s7Net.Read(SendAddr, 3000);
-                    this.Invoke(new Action(() =>
-                    {
-                        lock (this)
-                        {
-                            Txt_Recieve.Text = SoftBasic.ByteToHexString(ReadResult.Content);
-                            logNet.RecordMessage(HslMessageDegree.DEBUG, null, "读取" + Txt_Recieve.Text);
-                            logNet.RecordMessage(HslMessageDegree.DEBUG, null, "是否正常" + Check(Txt_Recieve.Text, Txt_Send.Text));
-                            //Thread.Sleep(500);                           
-                        }
+        //            }
+        //      ));
+        //            s7Net.Write(SendAddr, SoftBasic.HexStringToBytes(Txt_Send.Text));
+        //            logNet.RecordMessage(HslMessageDegree.DEBUG, null, "写入" + Txt_Send.Text);
+        //            //接受最多3000个字节
+        //            ReadResult = s7Net.Read(SendAddr, 3000);
+        //            this.Invoke(new Action(() =>
+        //            {
+        //                lock (this)
+        //                {
+        //                    Txt_Recieve.Text = SoftBasic.ByteToHexString(ReadResult.Content);
+        //                    logNet.RecordMessage(HslMessageDegree.DEBUG, null, "读取" + Txt_Recieve.Text);
+        //                    logNet.RecordMessage(HslMessageDegree.DEBUG, null, "是否正常" + Check(Txt_Recieve.Text, Txt_Send.Text));
+        //                    //Thread.Sleep(500);                           
+        //                }
 
-                    }
-                  ));
-
-
+        //            }
+        //          ));
 
 
-                }
-            });
 
 
-        }
+        //        }
+        //    });
+
+
+        //}
 
 
 
@@ -162,10 +163,12 @@ namespace WindowsFormsApp1
             _hdaStr = new List<HistoryData>();
             _hdaFloat = new List<HistoryData>();
             _hdaBit = new List<HistoryData>();
+          
 
-
-        timer1.Interval = 2000;
+            timer1.Interval = 2000;
             timer1.Start();
+            timer2.Interval = 2000;       
+            timer2.Start();
             
            // Task.Run(() => LibCreate()) ;
 
@@ -181,52 +184,52 @@ namespace WindowsFormsApp1
         }
 
 
-        private void AsyncStrStart(int length)
-        {
-            try
-            {
+        //private void AsyncStrStart(int length)
+        //{
+        //    try
+        //    {
               
-                ThreadState4 = true;
-                logNet2 = new LogNetSingle("StrDataLog.txt");
-                _LIBnodavePLC = new LIBnodavePLC();
-                bool isopen = _LIBnodavePLC.Init(txt_straddr.Text, Txt_IP.Text); ;
+        //        ThreadState4 = true;
+        //        logNet2 = new LogNetSingle("StrDataLog.txt");
+        //        _LIBnodavePLC = new LIBnodavePLC();
+        //        bool isopen = _LIBnodavePLC.Init(txt_straddr.Text, Txt_IP.Text); ;
               
-                string send = "";
-                string recive = "";
-                bool check = false;
-                Task.Run(() =>
-                {
-                    while (true)
-                    {
-                                 Thread.Sleep(10);                      
-                                    send = GetRandomString(length);
-                                _LIBnodavePLC.WriteBytes(SoftBasic.HexStringToBytes(send));
-                        byte[] ReciveData = _LIBnodavePLC.ReadBytes(send.Length / 2);
-                            recive= SoftBasic.ByteToHexString(ReciveData);
-                        if (send.CompareTo(recive) == 0)
-                            check = true;
-                        else
-                            check = false;
-                        double during = (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds;
-                            logNet2.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + send.Length.ToString() + "是否正常" + check);
+        //        string send = "";
+        //        string recive = "";
+        //        bool check = false;
+        //        Task.Run(() =>
+        //        {
+        //            while (true)
+        //            {
+        //                         Thread.Sleep(10);                      
+        //                            send = GetRandomString(length);
+        //                        _LIBnodavePLC.WriteBytes(SoftBasic.HexStringToBytes(send));
+        //                byte[] ReciveData = _LIBnodavePLC.ReadBytes(send.Length / 2);
+        //                    recive= SoftBasic.ByteToHexString(ReciveData);
+        //                if (send.CompareTo(recive) == 0)
+        //                    check = true;
+        //                else
+        //                    check = false;
+        //                double during = (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds;
+        //                    logNet2.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + send.Length.ToString() + "是否正常" + check);
 
-                            _hdaStr.Add(new HistoryData(during, send.Length, check, DateTime.Now));
+        //                    _hdaStr.Add(new HistoryData(during, send.Length, check, DateTime.Now));
 
-                    }
-
-
-
-                }
-                );
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(ex.Message);
-            }
+        //            }
 
 
-        }
+
+        //        }
+        //        );
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        MessageBox.Show(ex.Message);
+        //    }
+
+
+        //}
         
 
        
@@ -243,7 +246,7 @@ namespace WindowsFormsApp1
         ///<param name="useUpp">是否包含大写字母，1=包含，默认为包含</param>
         ///<param name="useSpe">是否包含特殊字符，1=包含，默认为不包含</param>
         ///<param name="custom">要包含的自定义字符，直接输入要包含的字符列表</param>
-        ///<returns>指定长度的随机字符串</returns>
+        ///<returns>指定长度的随机字符串<eturns>
         public static string GetRandomString(int length, bool useNum = true, bool useLow = false, bool useUpp = false)
         {
             byte[] b = new byte[4];
@@ -315,15 +318,11 @@ namespace WindowsFormsApp1
         //    AsyncFloatStart();
         //}
 
-        private LIBnodavePLC Connect(string addr)
-        {
+       // private LIBnodavePLC Connect(string addr)
+       // {
 
-            LIBnodavePLC _LIBnodavePLC = new LIBnodavePLC();
-            bool isopen = _LIBnodavePLC.Init(Txt_IP.Text);
-            _LIBnodavePLC.Device = _LIBnodavePLC.GetDeviceAddress(addr);
-           // _LIBnodavePLC.dataTyte=tyte;
-            return _LIBnodavePLC;
-        }
+       ////
+       // }
 
        
         private void start(Func<object> action) 
@@ -333,140 +332,140 @@ namespace WindowsFormsApp1
         }
        
 
-        private void AsyncFloatStart( LIBnodavePLC lIBnodavePLC, float[] floats)
-        {
-            int _Lenth = floats.Length;
-            int ERROR = 0;
-            string recive = null;
-            //string send = null;
-            bool check= false;
-            LogNetFloat = new LogNetSingle("FloatDataLog.txt");
-            ThreadState1 = true;
-            double during = 0;
-            Task.Run(() => {
+        //private void AsyncFloatStart( LIBnodavePLC lIBnodavePLC, float[] floats)
+        //{
+        //    int _Lenth = floats.Length;
+        //    int ERROR = 0;
+        //    string recive = null;
+        //    //string send = null;
+        //    bool check= false;
+        //    LogNetFloat = new LogNetSingle("FloatDataLog.txt");
+        //    ThreadState1 = true;
+        //    double during = 0;
+        //    Task.Run(() => {
                    
-                while (true)
-                {
-                    if (floats != null)
-                    {
-                        Thread.Sleep(10);
-                        floats = GetRandomfloat(750);
-                        lIBnodavePLC.WriteFloats(floats);
-                        lIBnodavePLC.ReadFloats(Convert.ToUInt16(floats.Length));
-                        check = (floats as IStructuralEquatable).Equals(lIBnodavePLC.Floats, StructuralComparisons.StructuralEqualityComparer);
+        //        while (true)
+        //        {
+        //            if (floats != null)
+        //            {
+        //                Thread.Sleep(10);
+        //                floats = GetRandomfloat(750);
+        //                lIBnodavePLC.WriteFloats(floats);
+        //                lIBnodavePLC.ReadFloats(Convert.ToUInt16(floats.Length));
+        //                check = (floats as IStructuralEquatable).Equals(lIBnodavePLC.Floats, StructuralComparisons.StructuralEqualityComparer);
 
                          
 
                        
                     
                        
-                        during = (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds;
-                        LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + check);
+        //                during = (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds;
+        //                LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + check);
 
-                        _hdaFloat.Add(new HistoryData(during,_Lenth,check,DateTime.Now));
-                    }
+        //                _hdaFloat.Add(new HistoryData(during,_Lenth,check,DateTime.Now,));
+        //            }
                    
                    
-                    else
-                    {
-                        float _value = 1.00f;
+        //            else
+        //            {
+        //                float _value = 1.00f;
 
-                        _value = _value + 0.01f;
-                        lIBnodavePLC.WriteFloat(_value);
-                        this.Invoke(new Action(() =>
-                        {
-                            LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
-                            recive = lIBnodavePLC.ReadFloat().ToString();
-                            LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
-                            if (_value.ToString() != recive.ToString())
-                            {
-                                ERROR++;
-                            }
-                            LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
-
-
-                        }
-
-                                          )
-                                          );
-                    }
-                }
-
-            });
+        //                _value = _value + 0.01f;
+        //                lIBnodavePLC.WriteFloat(_value);
+        //                this.Invoke(new Action(() =>
+        //                {
+        //                    LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
+        //                    recive = lIBnodavePLC.ReadFloat().ToString();
+        //                    LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
+        //                    if (_value.ToString() != recive.ToString())
+        //                    {
+        //                        ERROR++;
+        //                    }
+        //                    LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
 
 
+        //                }
 
-        }
+        //                                  )
+        //                                  );
+        //            }
+        //        }
+
+        //    });
+
+
+
+        //}
 
   
-        private void AsyncInt32Start(LIBnodavePLC lIBnodavePLC,int _Length)
-        {
-            //if (ThreadState2)
-            //{
+        //private void AsyncInt32Start(LIBnodavePLC lIBnodavePLC,int _Length)
+        //{
+        //    //if (ThreadState2)
+        //    //{
 
-            //    return;
-            //}
-            try
-            {               
-                int ERROR = 0;
+        //    //    return;
+        //    //}
+        //    try
+        //    {               
+        //        int ERROR = 0;
          
-                string log = string.Format("Int32DataLog.txt");
-                LogNetInt32 = new LogNetSingle(log);
-                string recive = null;
-                int[] send=null;
-                ThreadState2 = true;
-                bool check = false;
-                Task task = new Task(() =>
-                {
+        //        string log = string.Format("Int32DataLog.txt");
+        //        LogNetInt32 = new LogNetSingle(log);
+        //        string recive = null;
+        //        int[] send=null;
+        //        ThreadState2 = true;
+        //        bool check = false;
+        //        Task task = new Task(() =>
+        //        {
 
-                    int _value = 1;
-                    while (true)
-                    {
-                        if (_Length!= 0)
-                        {
-                            send = GetRandomInt32(_Length);
-                            Thread.Sleep(10);
-                            lIBnodavePLC.WriteInt32s(send);
-                                lIBnodavePLC.ReadInt32s(_Length);
+        //            int _value = 1;
+        //            while (true)
+        //            {
+        //                if (_Length!= 0)
+        //                {
+        //                    send = GetRandomInt32(_Length);
+        //                    Thread.Sleep(10);
+        //                    lIBnodavePLC.WriteInt32s(send);
+        //                        lIBnodavePLC.ReadInt32s(_Length);
 
-                            check = Check(lIBnodavePLC.Int32s,send);
-                                //LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + Check(recive, send));
+        //                    check = Check(lIBnodavePLC.Int32s,send);
+        //                        //LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + Check(recive, send));
                             
-                            _hdaInt32.Add(new HistoryData((lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds, _Length*4, check, DateTime.Now));
+        //                    _hdaInt32.Add(new HistoryData((lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds, _Length*4, check, DateTime.Now));
 
 
-                        }
+        //                }
 
-                        else
-                        {
-                            _value = _value + 1;
-                            lIBnodavePLC.WriteInt32(_value);
+        //                else
+        //                {
+        //                    _value = _value + 1;
+        //                    lIBnodavePLC.WriteInt32(_value);
 
-                            //  Txt_Send.Text = _value.ToString();
-                            LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
-                            recive = lIBnodavePLC.ReadInt32().ToString();
-                            LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
+        //                    //  Txt_Send.Text = _value.ToString();
+        //                    LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
+        //                    recive = lIBnodavePLC.ReadInt32().ToString();
+        //                    LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
 
-                            if (_value.ToString() != recive.ToString())
-                            {
-                                ERROR++;
-                            }
-                            LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
+        //                    if (_value.ToString() != recive.ToString())
+        //                    {
+        //                        ERROR++;
+        //                    }
+        //                    LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
 
-                        }
+        //                }
 
-                    }
+        //            }
 
-                });
+        //        });
 
-                task.Start();
-            }
-            catch (Exception ex)
-            {
+        //        task.Start();
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                throw ex;
-            }
-        }
+        //        throw ex;
+        //    }
+        //}
 
 
 
@@ -577,72 +576,72 @@ namespace WindowsFormsApp1
 
 
 
-        private void AsyncInt16Start(LIBnodavePLC lIBnodavePLC, int Length)
-        {
-            if (ThreadState)
-            {
+        //private void AsyncInt16Start(LIBnodavePLC lIBnodavePLC, int Length)
+        //{
+        //    if (ThreadState)
+        //    {
                 
-                return;
-            }
-            short[] sendbyte = null;
-            int ERROR = 0;
-            bool check = false;
-           // string send = null;
-            string recive = null;
-            string log = string.Format("Int16DataLog.txt");
-            LogNetInt16 = new LogNetSingle(log);
-            ThreadState = true;
-            Task task = new Task(() =>
-            {
-                Int16 _value = 1;
-                while (true)
-                {
-                    if (Length != 0)
-                    {
-                        Thread.Sleep(10);
-                        sendbyte = GetRandomInt16(Length);
-                        lIBnodavePLC.WriteInt16s(GetRandomInt16(Length));
-                        lIBnodavePLC.ReadInt16s(sendbyte.Length);
+        //        return;
+        //    }
+        //    short[] sendbyte = null;
+        //    int ERROR = 0;
+        //    bool check = false;
+        //   // string send = null;
+        //    string recive = null;
+        //    string log = string.Format("Int16DataLog.txt");
+        //    LogNetInt16 = new LogNetSingle(log);
+        //    ThreadState = true;
+        //    Task task = new Task(() =>
+        //    {
+        //        Int16 _value = 1;
+        //        while (true)
+        //        {
+        //            if (Length != 0)
+        //            {
+        //                Thread.Sleep(10);
+        //                sendbyte = GetRandomInt16(Length);
+        //                lIBnodavePLC.WriteInt16s(GetRandomInt16(Length));
+        //                lIBnodavePLC.ReadInt16s(sendbyte.Length);
                        
 
-                       // LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + sendbyte.Length.ToString() + "是否正常" + Check(recive, send));
+        //               // LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + sendbyte.Length.ToString() + "是否正常" + Check(recive, send));
                       
                  
 
-                        check = Check(lIBnodavePLC.Int16s, sendbyte);
-                        //LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + Check(recive, send));
+        //                check = Check(lIBnodavePLC.Int16s, sendbyte);
+        //                //LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + Check(recive, send));
 
-                        _hdaInt16.Add(new HistoryData((lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds, Length * 2, check, DateTime.Now));
-
-
-                    }
-
-                    else
-                    {
-                        _value++;
-                        lIBnodavePLC.WriteInt16(_value);
-                        LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
-                        recive = lIBnodavePLC.ReadInt16().ToString();
-                        LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
-                        if (_value.ToString() != recive.ToString())
-                        {
-                            ERROR++;
-                        }
-                        LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
-                        if (_value > 100)
-                        {
-                            _value = 0;
-                        }
-                    }
-
-                }
+        //                _hdaInt16.Add(new HistoryData((lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds, Length * 2, check, DateTime.Now));
 
 
+        //            }
 
-            });
+        //            else
+        //            {
+        //                _value++;
+        //                lIBnodavePLC.WriteInt16(_value);
+        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
+        //                recive = lIBnodavePLC.ReadInt16().ToString();
+        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
+        //                if (_value.ToString() != recive.ToString())
+        //                {
+        //                    ERROR++;
+        //                }
+        //                LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
+        //                if (_value > 100)
+        //                {
+        //                    _value = 0;
+        //                }
+        //            }
 
-            task.Start();
-        }
+        //        }
+
+
+
+        //    });
+
+        //    task.Start();
+        //}
 
 
 
@@ -698,15 +697,19 @@ namespace WindowsFormsApp1
 
         private void Btn_StrTest_Click(object sender, EventArgs e)
         {
-
-            if (ThreadState4)
-            {
-                return;
-            }
-            Task.Run(() => threadingTests.Add(new ThreadingTest(3000, txt_straddr.Text, "192.168.0.1", comm.DataTyte.STRING)));
+            CreateStart(int.Parse(txt_strLength.Text), txt_straddr.Text, Txt_IP.Text, comm.DataTyte.STRING);
         }
 
+        private void CreateStart (int length, string Addr, string IP, comm.DataTyte dataTyte, string ThreadCount = null)
+        {
+            ThreadingTest threadingTest = new ThreadingTest(length,Addr, IP,  dataTyte, ThreadCount);
+            threadingTest.MessageEventHandler += UpdateUI;
+            threadingTest.AsyncStart();
+            threadingTests.Add(threadingTest);
+        
+            
 
+        }
 
         private void Btn_bitTest_Click(object sender, EventArgs e)
         {
@@ -715,7 +718,7 @@ namespace WindowsFormsApp1
             {
                 return;
             }
-            Task.Run(() => AsyncBitStart(Connect(txt_bitaddr.Text)));    
+          
             
          
         }
@@ -727,12 +730,8 @@ namespace WindowsFormsApp1
 
         private void Btn_Int16Test_Click(object sender, EventArgs e)
         {
-            if (ThreadState)
-            {
-
-                return;
-            }
-            Task.Run(() => threadingTests.Add(new ThreadingTest(150, txt_int16addr.Text, "192.168.0.1", comm.DataTyte.INT16)));
+            CreateStart(int.Parse(txt_strLength.Text), txt_int16addr.Text, Txt_IP.Text, comm.DataTyte.INT16);
+           // Task.Run(() => threadingTests.Add(new ThreadingTest(3000, txt_int16addr.Text, Txt_IP.Text, comm.DataTyte.INT16)));
 
 
 
@@ -742,24 +741,17 @@ namespace WindowsFormsApp1
 
         private void Btn_FloatTest_Click(object sender, EventArgs e)
         {
-            if (ThreadState1)
-            {
-                return;
-            }
-      Task.Run(
-           ()=> threadingTests.Add(new ThreadingTest(750, txt_faddr.Text, "192.168.0.1",comm.DataTyte.REAL))
-          
-            );//  Task.Run(()=> AsyncFloatStart(Connect(txt_faddr.Text),GetRandomfloat(750))
-         
+
+            CreateStart(int.Parse(txt_strLength.Text), txt_faddr.Text, Txt_IP.Text, comm.DataTyte.REAL);
+      
         }
 
 
         private void Btn_Int32Test_Click(object sender, EventArgs e)
         {
-    
-           
 
-            Task.Run (() => threadingTests.Add(new ThreadingTest(750, txt_int32addr.Text, "192.168.0.1", comm.DataTyte.DINT32)));
+
+            CreateStart(int.Parse(txt_strLength.Text), txt_int32addr.Text, Txt_IP.Text, comm.DataTyte.REAL);
 
         }
 
@@ -774,57 +766,58 @@ namespace WindowsFormsApp1
 
         }
 
+        private void OneDBMultiStarts()
+        {
+            string ss=null;
+            string s;
+            int j = int.Parse(txt_startDB.Text.Trim());
+            int no = int.Parse(txt_ThreadNumber.Text.Trim());
+            for (int i = 0; i < no; i++)
+            {
+                if (j<10)
+                {
+                    s = '0' + j.ToString();
+                }
+                else
+                {
+                    s = j.ToString();
+                }
+                    if (radioButton1.Checked)
+                    {
+                        ss = $"DB{s}" + "." + "0" ;
+                    }
+                    else
+                        ss = $"DB{s}" + "," + "DBD0";
+
+                    CreateStart(int.Parse(txt_strLength.Text), ss, Txt_IP.Text, comm.DataTyte.STRING, j.ToString());
+                txt_log.Invoke(new MyDelegate(SetRich), "DB" + j.ToString());
+                j++;
+            }
+        }
+        delegate void MyDelegate(string str);//定义委托
+        private void SetRich(string str)//委托
+        {
+            txt_log.Text+= str+"\r\n";
+        }
+
         private void Button1_Click(object sender, EventArgs e)
         {
             //起始块
-            int j = 9;
-            for (int i = 0; i < 10; i++)
-            {
-                j++;
-                threadingTests.Add(new ThreadingTest(3000, "DB"+ j.ToString()+','+"DBD0" , Txt_IP.Text, comm.DataTyte.STRING,j.ToString()));
-            }
+            Task.Run(() => OneDBMultiStarts());
         
            
 
         }
-        private void SaveData<T>(string TableName,List<T> ts)
+
+        private void UpdateUI( object message,EventArgs e )
         {
-            try
-            {
-               
-                lock (_lock)
-                {
-                    
-                        using (SqlBulkCopy sbc = new SqlBulkCopy(comm.Connection))
-                        {
-                            using (DataTable dt = comm.ToDataTable(ts))
-                            {
+          
 
-                                try
-                                {
-
-                                    sbc.DestinationTableName = TableName;
-                                    sbc.WriteToServer(dt);
-                                    ts.Clear();
-                                }
-                                catch (Exception ex)
-                                {
-                                    throw new Exception("BulkInsert调用异常", ex);
-                                }
-                            }
-                        }
-
-                    
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
+           txt_log.Invoke(new Action(() => txt_log.Text += message)); 
+         
 
         }
+       
 
 
 
@@ -832,77 +825,7 @@ namespace WindowsFormsApp1
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            try
-            {
-                if (threadingTests!=null)
-                {
 
-                    foreach (var item in threadingTests)
-                    {
-                        if (item.ListData.Count > comm.MaxCount)
-                        { 
-                            switch (item.DataTyte)
-                            {
-                                case comm.DataTyte.BOOL:
-
-                                    break;
-                                case comm.DataTyte.WORD:
-
-                                    SaveData<HistoryData>("HistoryData_Word" + item.ThreadCount, item.ListData);
-                                    break;
-                                case comm.DataTyte.INT16:
-
-                                    SaveData<HistoryData>("HistoryData_Int16" + item.ThreadCount, item.ListData);
-                                    break;
-                                case comm.DataTyte.DINT32:
-                                    SaveData<HistoryData>("HistoryData_Int32" + item.ThreadCount, item.ListData);
-                                    break;
-                                case comm.DataTyte.REAL:
-                                    SaveData<HistoryData>("HistoryData_real" + item.ThreadCount, item.ListData);
-                                    break;
-                                case comm.DataTyte.STRING:
-                                    SaveData<HistoryData>("HistoryData_str" + item.ThreadCount, item.ListData);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-
-
-                        //if (item.ListData.Count > comm.MaxCount)
-                        //{                        
-                        //    SaveData<HistoryData>("HistoryData_str" + item.ThreadCount, item.ListData);
-                        //}
-                    }
-                }
-            
-              
-                //    if (_hdaFloat.Count > comm.MaxCount)
-                //    {
-                //     SaveData<HistoryData>("HistoryData_real", _hdaFloat);                     
-                //    }
-
-                //    if(_hdaInt16.Count> comm.MaxCount)
-                //    {
-                //  SaveData<HistoryData>("HistoryData_Int16", _hdaInt16);
-                //    }
-                //    if (_hdaInt32.Count > comm.MaxCount)
-                //    {
-                //        SaveData<HistoryData>("HistoryData_Int32", _hdaInt32);
-                //    }
-                //if (_hdaStr.Count > comm.MaxCount)
-                //{
-                // SaveData<HistoryData>("HistoryData_Str", _hdaStr);
-                //}
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-          
 
         }
 
@@ -913,10 +836,85 @@ namespace WindowsFormsApp1
 
         private void Btn_word_Click(object sender, EventArgs e)
         {
-            Task.Run(
+            CreateStart(int.Parse(txt_strLength.Text), txt_wordaddr.Text, Txt_IP.Text, comm.DataTyte.REAL);
+         
+        }
 
-          ()=>  threadingTests.Add(new ThreadingTest(1500, txt_wordaddr.Text, "192.168.0.1", comm.DataTyte.WORD))
-            );
+        private void Button2_Click(object sender, EventArgs e)
+        {
+            foreach (var item in threadingTests)
+            {
+                item.Close();
+
+            }
+            threadingTests.Clear();
+        }
+
+
+
+        private void Button3_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                string ss = "";
+                string s = "";
+                for (int i = int.Parse(txt_startDB.Text); i < int.Parse(txt_ThreadNumber.Text); i++)
+                {
+                    if (i < 10)
+                    {
+                        s = '0' + i.ToString();
+                    }
+                    else
+                    {
+                        s = i.ToString();
+                    }
+                    if (radioButton1.Checked)
+                    {
+                        ss += $"DB{s}" + "." + "0" + "|" + txt_strLength.Text.Trim() + ";";
+                    }
+                    else
+                    ss += $"DB{s}" + "," + "DBD0" + "|" + txt_strLength.Text.Trim() + ";";
+                    StartDBList(Txt_IP.Text, ss);
+                }
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("请输入正确的DB块数和起始DB块");
+            }
+
+           
+        }
+     
+        private void StartDBList(string IP,string addr)
+        {
+            ThreadingTest threadingTest = new ThreadingTest(IP,addr);
+           
+            txt_log.Text += "读取PLC:" + IP + threadingTest.Result;
+            threadingTest.MessageEventHandler += UpdateUI;
+            threadingTests.Add(threadingTest);
+        }
+
+
+        private void TextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Timer2_Tick(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void ListDataBindingSource_CurrentChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

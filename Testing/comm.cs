@@ -12,7 +12,7 @@ namespace WindowsFormsApp1
 {
   public  static class comm
     {
-        public  enum DataTyte { BOOL=0, WORD=1,INT16=2,DINT32=3,REAL=4,STRING=5 }
+        public  enum DataTyte { BOOL=0, WORD=1,INT16=2,INT32=3,REAL=4,STRING=5 }
 
         public  static readonly string Connection = ConfigurationManager.ConnectionStrings["Conn"].ConnectionString.ToString();
         public static readonly int MaxCount =int.Parse(ConfigurationManager.AppSettings["MaxCount"]);
