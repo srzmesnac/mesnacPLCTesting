@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
-    interface IPLC
+    public interface IPLC
     {
         bool Init(string ADD, string IP);
 
          string Address { set; get; }
        IEnumerable ReadBuff { set; get; }
-         bool IsConnect { get;  }  
+         bool IsConnect { get; set; }  
          string ErrorCode { get; set; }
          DateTime Sendtime
         {

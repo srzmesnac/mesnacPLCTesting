@@ -34,7 +34,7 @@ namespace WindowsFormsApp1
             InitializeComponent();
             #region 添加启动日志 Srz
             logNetStart = new LogNetSingle("StartLog.txt");
-            logNetStart.RecordMessage(HslMessageDegree.DEBUG, null, "程序启动"+DateTime.Now.ToString());
+            logNetStart.RecordMessage(HslMessageDegree.DEBUG, null, "程序启动" + DateTime.Now.ToString());
             #endregion
             //if (result.IsSuccess)
             //{
@@ -52,7 +52,7 @@ namespace WindowsFormsApp1
         private ILogNet LogNetInt32;
         private ILogNet LogNetInt16;
         private ILogNet LogNetBit;
-        private LIBnodavePLC _LIBnodavePLC;
+        private IPLC PLCTextBox;
         private static object _lock = new object();
         private List<HistoryData> _hdaInt16;
         private List<HistoryData> _hdaInt32;
@@ -64,7 +64,7 @@ namespace WindowsFormsApp1
         //
         //private void CSLInit()
         //{
-         
+
         //    logNet = new LogNetSingle("log.txt");
 
         //    Txt_Recieve.Text = "";
@@ -140,21 +140,21 @@ namespace WindowsFormsApp1
 
 
         }
-        private void LibCreate()
-        {
-            _LIBnodavePLC = new LIBnodavePLC();
-            bool isopen = _LIBnodavePLC.Init(Txt_IP.Text);
-            if (isopen)
-            {
-                userLantern1.LanternBackground = Color.Green;
-            }
-            else
-            {
-                userLantern1.LanternBackground = Color.Red;
+        //private void LibCreate()
+        //{
+        //    _LIBnodavePLC = new LIBnodavePLC();
+        //    bool isopen = _LIBnodavePLC.Init(Txt_IP.Text);
+        //    if (isopen)
+        //    {
+        //        userLantern1.LanternBackground = Color.Green;
+        //    }
+        //    else
+        //    {
+        //        userLantern1.LanternBackground = Color.Red;
 
-            }
+        //    }
 
-        }
+        //}
         private void Form1_Load(object sender, EventArgs e)
         {
             threadingTests = new List<ThreadingTest>();
@@ -163,14 +163,10 @@ namespace WindowsFormsApp1
             _hdaStr = new List<HistoryData>();
             _hdaFloat = new List<HistoryData>();
             _hdaBit = new List<HistoryData>();
-          
+           
 
-            timer1.Interval = 2000;
-            timer1.Start();
-            timer2.Interval = 2000;       
-            timer2.Start();
-            
-           // Task.Run(() => LibCreate()) ;
+
+            // Task.Run(() => LibCreate()) ;
 
             //LibInit();
             //CSLInit();
@@ -180,7 +176,7 @@ namespace WindowsFormsApp1
         }
         private bool Check(IEnumerable arr1, IEnumerable arr2)
         {
-            return  (arr1 as IStructuralEquatable).Equals(arr2, StructuralComparisons.StructuralEqualityComparer);
+            return (arr1 as IStructuralEquatable).Equals(arr2, StructuralComparisons.StructuralEqualityComparer);
         }
 
 
@@ -188,12 +184,12 @@ namespace WindowsFormsApp1
         //{
         //    try
         //    {
-              
+
         //        ThreadState4 = true;
         //        logNet2 = new LogNetSingle("StrDataLog.txt");
         //        _LIBnodavePLC = new LIBnodavePLC();
         //        bool isopen = _LIBnodavePLC.Init(txt_straddr.Text, Txt_IP.Text); ;
-              
+
         //        string send = "";
         //        string recive = "";
         //        bool check = false;
@@ -230,9 +226,9 @@ namespace WindowsFormsApp1
 
 
         //}
-        
 
-       
+
+
 
 
 
@@ -272,7 +268,7 @@ namespace WindowsFormsApp1
             for (int i = 0; i < length; i++)
             {
                 Int32 a = rd.Next(100000);
-             
+
                 Listvalues.Add(a);
             }
 
@@ -280,18 +276,18 @@ namespace WindowsFormsApp1
 
         }
 
-        public static float [] GetRandomfloat(int length)
+        public static float[] GetRandomfloat(int length)
         {
             List<float> floats = new List<float>();
-            Random rd = new Random();                    
+            Random rd = new Random();
             for (int i = 0; i < length; i++)
             {
                 int a = rd.Next(100000);
                 float f = (float)(a * 0.01);
                 floats.Add(f);
             }
-           
-           return floats.ToArray();
+
+            return floats.ToArray();
         }
         public static Int16[] GetRandomInt16(int length)
         {
@@ -308,7 +304,7 @@ namespace WindowsFormsApp1
             return Listvalues.ToArray();
 
         }
-   
+
 
 
 
@@ -318,19 +314,19 @@ namespace WindowsFormsApp1
         //    AsyncFloatStart();
         //}
 
-       // private LIBnodavePLC Connect(string addr)
-       // {
+        // private LIBnodavePLC Connect(string addr)
+        // {
 
-       ////
-       // }
+        ////
+        // }
 
-       
-        private void start(Func<object> action) 
+
+        private void start(Func<object> action)
         {
-            
+
 
         }
-       
+
 
         //private void AsyncFloatStart( LIBnodavePLC lIBnodavePLC, float[] floats)
         //{
@@ -343,7 +339,7 @@ namespace WindowsFormsApp1
         //    ThreadState1 = true;
         //    double during = 0;
         //    Task.Run(() => {
-                   
+
         //        while (true)
         //        {
         //            if (floats != null)
@@ -354,18 +350,18 @@ namespace WindowsFormsApp1
         //                lIBnodavePLC.ReadFloats(Convert.ToUInt16(floats.Length));
         //                check = (floats as IStructuralEquatable).Equals(lIBnodavePLC.Floats, StructuralComparisons.StructuralEqualityComparer);
 
-                         
 
-                       
-                    
-                       
+
+
+
+
         //                during = (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds;
         //                LogNetFloat.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + check);
 
         //                _hdaFloat.Add(new HistoryData(during,_Lenth,check,DateTime.Now,));
         //            }
-                   
-                   
+
+
         //            else
         //            {
         //                float _value = 1.00f;
@@ -397,7 +393,7 @@ namespace WindowsFormsApp1
 
         //}
 
-  
+
         //private void AsyncInt32Start(LIBnodavePLC lIBnodavePLC,int _Length)
         //{
         //    //if (ThreadState2)
@@ -408,7 +404,7 @@ namespace WindowsFormsApp1
         //    try
         //    {               
         //        int ERROR = 0;
-         
+
         //        string log = string.Format("Int32DataLog.txt");
         //        LogNetInt32 = new LogNetSingle(log);
         //        string recive = null;
@@ -430,7 +426,7 @@ namespace WindowsFormsApp1
 
         //                    check = Check(lIBnodavePLC.Int32s,send);
         //                        //LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + Check(recive, send));
-                            
+
         //                    _hdaInt32.Add(new HistoryData((lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds, _Length*4, check, DateTime.Now));
 
 
@@ -501,7 +497,7 @@ namespace WindowsFormsApp1
                         lIBnodavePLC.WriteInt32(_value);
 
                         //  Txt_Send.Text = _value.ToString();
-                        LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString()); 
+                        LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
                         recive = lIBnodavePLC.ReadInt32().ToString();
                         LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
 
@@ -520,13 +516,13 @@ namespace WindowsFormsApp1
             catch (Exception ex)
             {
 
-                throw ex ;
+                throw ex;
             }
         }
-               
-        private void AsyncBitStart( LIBnodavePLC lIBnodavePLC)
+
+        private void AsyncBitStart(LIBnodavePLC lIBnodavePLC)
         {
-           
+
             if (!ThreadState3)
             {
                 int ERROR = 0;
@@ -535,7 +531,7 @@ namespace WindowsFormsApp1
                 string log = string.Format("BitDataLog.txt");
                 LogNetBit = new LogNetSingle(log);
                 string recive = null;
-                Task task = new Task(()=>
+                Task task = new Task(() =>
                 {
                     while (true)
                     {
@@ -544,9 +540,9 @@ namespace WindowsFormsApp1
                         flagl = !flagl;
                         lIBnodavePLC.WriteBit(flagl);
                         LogNetBit.RecordMessage(HslMessageDegree.DEBUG, "写入", flagl.ToString());
-                     recive=   lIBnodavePLC.ReadBit().ToString();
-                        LogNetBit.RecordMessage(HslMessageDegree.DEBUG, "读入",recive );
-                        if (flagl.ToString()!=recive.ToString())
+                        recive = lIBnodavePLC.ReadBit().ToString();
+                        LogNetBit.RecordMessage(HslMessageDegree.DEBUG, "读入", recive);
+                        if (flagl.ToString() != recive.ToString())
                         {
                             ERROR++;
                         }
@@ -554,14 +550,14 @@ namespace WindowsFormsApp1
 
                     }
                 }
-                
+
               );
 
                 task.Start();
             }
 
         }
-        private void WriteData <T>(T t)
+        private void WriteData<T>(T t)
         {
 
 
@@ -580,7 +576,7 @@ namespace WindowsFormsApp1
         //{
         //    if (ThreadState)
         //    {
-                
+
         //        return;
         //    }
         //    short[] sendbyte = null;
@@ -602,11 +598,11 @@ namespace WindowsFormsApp1
         //                sendbyte = GetRandomInt16(Length);
         //                lIBnodavePLC.WriteInt16s(GetRandomInt16(Length));
         //                lIBnodavePLC.ReadInt16s(sendbyte.Length);
-                       
+
 
         //               // LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + sendbyte.Length.ToString() + "是否正常" + Check(recive, send));
-                      
-                 
+
+
 
         //                check = Check(lIBnodavePLC.Int16s, sendbyte);
         //                //LogNetInt32.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (lIBnodavePLC.Readtime - lIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + _Lenth.ToString() + "是否正常" + Check(recive, send));
@@ -647,7 +643,7 @@ namespace WindowsFormsApp1
 
 
 
-        private void AsyncInt16Start( LIBnodavePLC lIBnodavePLC)
+        private void AsyncInt16Start(LIBnodavePLC lIBnodavePLC)
         {
             if (ThreadState)
             {
@@ -664,51 +660,56 @@ namespace WindowsFormsApp1
 
 
 
-               
-                    Int16 _value = 1;
-                    while (true)
-                    {
+
+                Int16 _value = 1;
+                while (true)
+                {
                     Thread.Sleep(10);
-                    _value ++;
-                        lIBnodavePLC.WriteInt16(_value);
+                    _value++;
+                    lIBnodavePLC.WriteInt16(_value);
 
 
 
-                        LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
-                                recive = lIBnodavePLC.ReadInt16().ToString();
-                        LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
+                    LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "写入", _value.ToString());
+                    recive = lIBnodavePLC.ReadInt16().ToString();
+                    LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "读取", recive);
                     if (_value.ToString() != recive.ToString())
                     {
                         ERROR++;
                     }
                     LogNetInt16.RecordMessage(HslMessageDegree.DEBUG, "ERROR", ERROR.ToString());
-                    if (_value>100)
-                        {
-                            _value = 0;
-                        }
+                    if (_value > 100)
+                    {
+                        _value = 0;
                     }
-                
+                }
+
             });
 
             task.Start();
         }
-        
-       
+
+
 
         private void Btn_StrTest_Click(object sender, EventArgs e)
         {
             CreateStart(int.Parse(txt_strLength.Text), txt_straddr.Text, Txt_IP.Text, comm.DataTyte.STRING);
         }
 
-        private void CreateStart (int length, string Addr, string IP, comm.DataTyte dataTyte, string ThreadCount = null)
+        private void CreateStart(int length, string Addr, string IP, comm.DataTyte dataTyte, string ThreadCount = null)
         {
-            ThreadingTest threadingTest = new ThreadingTest(length,Addr, IP,  dataTyte, ThreadCount);
+            if (!radioButton1.Checked)
+            {
+                PLCTextBox = new LIBnodavePLC();
+            }
+            else
+                PLCTextBox = new SenmensPLC();
+            ThreadingTest threadingTest = new ThreadingTest(length,Addr, IP,  dataTyte, PLCTextBox, ThreadCount);
             threadingTest.MessageEventHandler += UpdateUI;
             threadingTest.AsyncStart();
             threadingTests.Add(threadingTest);
         
-            
-
+           
         }
 
         private void Btn_bitTest_Click(object sender, EventArgs e)
@@ -751,7 +752,7 @@ namespace WindowsFormsApp1
         {
 
 
-            CreateStart(int.Parse(txt_strLength.Text), txt_int32addr.Text, Txt_IP.Text, comm.DataTyte.REAL);
+            CreateStart(int.Parse(txt_strLength.Text), txt_int32addr.Text, Txt_IP.Text, comm.DataTyte.INT32);
 
         }
 
@@ -810,12 +811,15 @@ namespace WindowsFormsApp1
         }
 
         private void UpdateUI( object message,EventArgs e )
-        {
-          
+        {         
+           txt_log.Invoke(new Action(() =>
+           {
+               txt_log.Text += message;
+               txt_log.SelectionStart = txt_log.Text.Length; //设定光标位置
+               txt_log.ScrollToCaret();
 
-           txt_log.Invoke(new Action(() => txt_log.Text += message)); 
-         
-
+           }));
+           
         }
        
 
@@ -836,7 +840,7 @@ namespace WindowsFormsApp1
 
         private void Btn_word_Click(object sender, EventArgs e)
         {
-            CreateStart(int.Parse(txt_strLength.Text), txt_wordaddr.Text, Txt_IP.Text, comm.DataTyte.REAL);
+            CreateStart(int.Parse(txt_strLength.Text), txt_wordaddr.Text, Txt_IP.Text, comm.DataTyte.WORD);
          
         }
 
@@ -845,8 +849,11 @@ namespace WindowsFormsApp1
             foreach (var item in threadingTests)
             {
                 item.Close();
-
+                txt_log.Text += item.Name + "结束" + "-----------" + DateTime.Now;
+                item.Dispose();
             }
+           
+           
             threadingTests.Clear();
         }
 
@@ -854,12 +861,11 @@ namespace WindowsFormsApp1
 
         private void Button3_Click(object sender, EventArgs e)
         {
-
             try
             {
                 string ss = "";
                 string s = "";
-                for (int i = int.Parse(txt_startDB.Text); i < int.Parse(txt_ThreadNumber.Text); i++)
+                for (int i = int.Parse(txt_startDB.Text); i < int.Parse(txt_ThreadNumber.Text)+1; i++)
                 {
                     if (i < 10)
                     {
@@ -875,27 +881,32 @@ namespace WindowsFormsApp1
                     }
                     else
                     ss += $"DB{s}" + "," + "DBD0" + "|" + txt_strLength.Text.Trim() + ";";
-                    StartDBList(Txt_IP.Text, ss);
+                   
                 }
+                StartDBList(Txt_IP.Text, ss);
             }
             catch (Exception)
             {
 
                 MessageBox.Show("请输入正确的DB块数和起始DB块");
             }
-
-           
+         
         }
      
         private void StartDBList(string IP,string addr)
         {
-            ThreadingTest threadingTest = new ThreadingTest(IP,addr);
+            if (radioButton1.Checked)
+            {
+                PLCTextBox = new SenmensPLC();
+            }
+            else
+                PLCTextBox = new LIBnodavePLC();
+            ThreadingTest threadingTest = new ThreadingTest(IP,addr,PLCTextBox);
            
             txt_log.Text += "读取PLC:" + IP + threadingTest.Result;
             threadingTest.MessageEventHandler += UpdateUI;
             threadingTests.Add(threadingTest);
         }
-
 
         private void TextBox1_TextChanged(object sender, EventArgs e)
         {
@@ -911,8 +922,12 @@ namespace WindowsFormsApp1
         {
 
         }
-
         private void ListDataBindingSource_CurrentChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Txt_IP_TextChanged(object sender, EventArgs e)
         {
 
         }

@@ -18,12 +18,19 @@ using System.Timers;
 
 namespace WindowsFormsApp1
 {
-    public class ThreadingTest
+    public class ThreadingTest:IDisposable
     {
         private ILogNet logNet;
         public    event  EventHandler MessageEventHandler;
-
-
+        public string Name { get; set; }
+        private System.Timers.Timer timer1 = new System.Timers.Timer();
+        private static object _lock = new object();
+        private int _DataLength;
+        private string _Addr;
+        private string _IP;
+        private comm.DataTyte _dataTyte;
+        private string _ThreadCount;
+        IPLC _PLCDriver;
         private List<HistoryData> _hda;
         public List<HistoryData> ListData
         {
@@ -42,11 +49,11 @@ namespace WindowsFormsApp1
         public bool IsConnect
         { get
             {
-                return _LIBnodavePLC.IsConnect;
+                return _PLCDriver.IsConnect;
             }
         }
         public bool IsClosed { get {
-                return _LIBnodavePLC.IsClosed;
+                return _PLCDriver.IsClosed;
             } }
         public HistoryData LastDate { get
 
@@ -60,32 +67,27 @@ namespace WindowsFormsApp1
             } }
 
 
-        public string Name { get; set; }
-        private System.Timers.Timer timer1 = new System.Timers.Timer();
-        private static object _lock = new object();
-        private int _DataLength;
-        private string _Addr;
-        private string _IP;
-        private comm.DataTyte _dataTyte;
-        private string _ThreadCount;
+        private bool isFirst = true;
    
         CancellationTokenSource tokenSource = new CancellationTokenSource();
-       private LIBnodavePLC _LIBnodavePLC ;
+
         //private IPLC PLC;
-      /// <summary>
-      /// 单块线程，一个线程一个DB块
-      /// </summary>
-      /// <param name="length">数据长度</param>
-      /// <param name="Addr">地址块</param>
-      /// <param name="IP">PLC的IP地址</param>
-      /// <param name="dataTyte">数据类型</param>
-      /// <param name="ThreadCount">线程数，不设置为空</param>
-        public ThreadingTest(int length, string Addr, string IP, comm.DataTyte dataTyte, string ThreadCount = null)
+        #region 单DB块构造函数
+        /// <summary>
+        /// 单块线程，一个线程一个DB块
+        /// </summary>
+        /// <param name="length">数据长度</param>
+        /// <param name="Addr">地址块</param>
+        /// <param name="IP">PLC的IP地址</param>
+        /// <param name="dataTyte">数据类型</param>
+        /// <param name="ThreadCount">线程数，不设置为空</param>
+        public ThreadingTest(int length, string Addr, string IP, comm.DataTyte dataTyte, IPLC PLCTextBox, string ThreadCount = null)
         {
-        
+            isFirst = true;
             timer1.Elapsed += timer1_Elapsed;
+            timer1.Interval = 3000;
             logNet = new LogNetSingle("Treadinglog.txt");
-            _LIBnodavePLC = new LIBnodavePLC();
+            _PLCDriver = PLCTextBox;
             //PLC = new SenmensPLC();
             this._DataLength = length;
             this._Addr = Addr;
@@ -94,27 +96,37 @@ namespace WindowsFormsApp1
             this._ThreadCount = ThreadCount;
             this._dataTyte = dataTyte;
             Name = "单线程读取,地址：" + _Addr + "PLC IP:" + IP + "\r\n";
-
+            timer1.Start();
         }
+        #endregion
 
+        #region 检测连接是否断开线程
         private void timer1_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (IsConnect)
+            if (_PLCDriver.IP==null||isFirst==true)
             {
-                _LIBnodavePLC.Connect();
-                if (MessageEventHandler != null)
+                return;
+            }
+            if (!IsConnect)
+            {
+                lock (this)
                 {
-                    MessageEventHandler(Name + DateTime.Now + "已重新连接", null);
+                    _PLCDriver.Connect();
+                    if (MessageEventHandler != null)
+                    {
+                        MessageEventHandler(Name + DateTime.Now + "已重新连接", null);
+                    }
                 }
-
             }
         }
+        #endregion
 
-        public ThreadingTest(string IP,string addr )
+        public ThreadingTest(string IP,string addr,IPLC PLCTextBox)
         {
+            isFirst = true;
             timer1.Elapsed += timer1_Elapsed;
             
-         _LIBnodavePLC = new LIBnodavePLC();
+         _PLCDriver = PLCTextBox;
             this._IP = IP;
             _Addr = addr;
             AsyncMultiDBStart();
@@ -153,8 +165,10 @@ namespace WindowsFormsApp1
         {
 
             tokenSource.Cancel();
+          
 
         }
+        #region  多数据块读写数据线程
         /// <summary>
         /// 同一PLC不同DB块同时读取数据
         /// </summary>
@@ -162,14 +176,16 @@ namespace WindowsFormsApp1
         /// <returns><eturns>
         public int AsyncMultiDBStart()
         {
+           
             _hda = new List<HistoryData>();
             List<PLCAddrList> pLCAddrLists = GetPLCAddrLists(_Addr);
             CancellationToken token = tokenSource.Token;       
             _dataTyte = comm.DataTyte.STRING;
-            _LIBnodavePLC.IP = this._IP;
-            _LIBnodavePLC.Connect();
+            _PLCDriver.IP = this._IP;
+            _PLCDriver.Connect();
             if (IsConnect)
             {
+                isFirst = false;
                 Result = "与PLC连接成功:" + _IP+"地址为"+ _Addr+"---------" + DateTime.Now+"\r\n";
             }
             else
@@ -179,7 +195,7 @@ namespace WindowsFormsApp1
             }
            
 
-            Task<int> task = new Task<int>(() =>
+            Task task = new Task(() =>
               {                                     
                   while (true)
                   {
@@ -198,36 +214,37 @@ namespace WindowsFormsApp1
                               if (token.IsCancellationRequested)
                               {
                                   _hda.Clear();
-                                  _LIBnodavePLC.Dispose();
+                                  _PLCDriver.Dispose();
                                   throw new OperationCanceledException(token);
+                                  
                               }
                               send = GetRandomString(item.DataLenth * 2);
                             
-                              _LIBnodavePLC.Address = item.Addr;
+                              _PLCDriver.Address = item.Addr;
 
-                              int ret = _LIBnodavePLC.WriteBytes(SoftBasic.HexStringToBytes(send));
+                              int ret = _PLCDriver.WriteBytes(SoftBasic.HexStringToBytes(send));
                               if (ret != 0)
                               {
 
-                                  string result = item.Addr + "写数据失败：" + _LIBnodavePLC.ErrorCode + "---------" + DateTime.Now + "\r\n";
+                                  string result = item.Addr + "写数据失败：" + _PLCDriver.ErrorCode + "---------" + DateTime.Now + "\r\n";
                                   if (MessageEventHandler != null)
                                   {
                                       MessageEventHandler(result, null);
                                   }
                               }
-                              ret = _LIBnodavePLC.ReadBytesResult(item.DataLenth);
+                              ret = _PLCDriver.ReadBytesResult(item.DataLenth);
                               if (ret != 0)
                               {
-                                  string result = _IP + item.Addr + "读数据失败：" + _LIBnodavePLC.ErrorCode + "---------" + DateTime.Now + "\r\n";
+                                  string result = _IP + item.Addr + "读数据失败：" + _PLCDriver.ErrorCode + "---------" + DateTime.Now + "\r\n";
                                   if (MessageEventHandler != null)
                                   {
                                       MessageEventHandler(result, null);
                                   }
                               }
-                              byte[] ReciveData = _LIBnodavePLC.ReadBuff as byte[];
+                              byte[] ReciveData = _PLCDriver.ReadBuff as byte[];
                               recive = SoftBasic.ByteToHexString(ReciveData);
 
-                              during += (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds;
+                              during += (_PLCDriver.Readtime - _PLCDriver.Sendtime).TotalMilliseconds;
                               check &= send.Equals(recive);
                               DBAddr += item.Addr;
                               length += item.DataLenth;
@@ -266,7 +283,11 @@ namespace WindowsFormsApp1
                       {
                           if (MessageEventHandler!=null)
                           {
-                              MessageEventHandler(_LIBnodavePLC.ErrorCode + ex.Message.ToString(), null);
+                              MessageEventHandler(_PLCDriver.ErrorCode + ex.Message.ToString(), null);
+                          }
+                          if (token.IsCancellationRequested)
+                          {
+                              break;
                           }
                       
                       }
@@ -275,7 +296,9 @@ namespace WindowsFormsApp1
             task.Start();
             return 0;
         }
+        #endregion
 
+        #region 单一数据块块读写取数据线程
         public void AsyncStart()
         {
             try
@@ -284,10 +307,11 @@ namespace WindowsFormsApp1
                 CancellationToken token = tokenSource.Token;
                 string Addr = this._Addr;
                 string IP = this._IP;
-                if (!_LIBnodavePLC.IsConnect)
+                if (!_PLCDriver.IsConnect)
                 {
                     logNet.RecordMessage(HslMessageDegree.INFO, "创建连接中-----线程"+ThreadCount,DateTime.Now.ToString() );
-                    bool isopen = _LIBnodavePLC.Init(Addr, IP);
+                    bool isopen = _PLCDriver.Init(Addr, IP);
+                    isFirst = false;
                     if (!isopen)
                     {
                         MessageEventHandler( _dataTyte.ToString() + "建立连接失败" + DateTime.Now + "\r\n", null);
@@ -304,6 +328,7 @@ namespace WindowsFormsApp1
                 string send = "";
                 string recive = "";
                 int length = 0;
+                int ret = -1;
                 IEnumerable sendBytes;
                task=new Task(() =>
                 {
@@ -312,8 +337,9 @@ namespace WindowsFormsApp1
                         if (token.IsCancellationRequested)
                         {
                                 _hda.Clear();
-                                _LIBnodavePLC.Dispose();
-                                throw new OperationCanceledException(token);
+                                _PLCDriver.Dispose();
+                            return;
+                                //throw new OperationCanceledException(token);
                         }
 
                         try
@@ -327,40 +353,82 @@ namespace WindowsFormsApp1
                                 case comm.DataTyte.WORD:
                                     length = this._DataLength / 2;
                                     sendBytes = GetRandomUshort(length);
-                                    _LIBnodavePLC.WriteUInt16s(sendBytes as UInt16[]);
-                                    _LIBnodavePLC.ReadUInt16s(length);
-                                    check = Check(sendBytes, _LIBnodavePLC.ReadBuff);
+                                 ret= _PLCDriver.WriteUInt16s(sendBytes as UInt16[]);
+                                    if (ret!=0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                  ret=  _PLCDriver.ReadUInt16s(length);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    check = Check(sendBytes, _PLCDriver.ReadBuff);
                                     break;
                                 case comm.DataTyte.INT16:
                                     length = this._DataLength / 2;
                                     sendBytes = GetRandomInt16(length);
-                                    _LIBnodavePLC.WriteInt16s(sendBytes as Int16[]);
-                                    _LIBnodavePLC.ReadInt16s(length);
-                                    check = Check(sendBytes, _LIBnodavePLC.ReadBuff);
+                                  ret=  _PLCDriver.WriteInt16s(sendBytes as Int16[]);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    ret = _PLCDriver.ReadInt16s(length);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    check = Check(sendBytes, _PLCDriver.ReadBuff);
 
 
                                     break;
                                 case comm.DataTyte.INT32:
                                     length = this._DataLength / 4;
                                     sendBytes = GetRandomInt32(length);
-                                    _LIBnodavePLC.WriteInt32s(sendBytes as Int32[]);
-                                    _LIBnodavePLC.ReadInt32s(length);
-                                    check = Check(sendBytes, _LIBnodavePLC.ReadBuff);
+                                  ret=  _PLCDriver.WriteInt32s(sendBytes as Int32[]);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    ret =   _PLCDriver.ReadInt32s(length);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    check = Check(sendBytes, _PLCDriver.ReadBuff);
                                     break;
                                 case comm.DataTyte.REAL:
                                     length = this._DataLength / 4;
                                     sendBytes = GetRandomfloat(length);
-                                    _LIBnodavePLC.WriteFloats(sendBytes as float[]);
-                                    _LIBnodavePLC.ReadFloats(length);
-                                    check = Check(sendBytes, _LIBnodavePLC.ReadBuff);
+                                  ret=  _PLCDriver.WriteFloats(sendBytes as float[]);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    ret =  _PLCDriver.ReadFloats(length);
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    check = Check(sendBytes, _PLCDriver.ReadBuff);
 
                                     break;
                                 case comm.DataTyte.STRING:
                                     length = this._DataLength * 2;
                                     send = GetRandomString(length);
-                                    _LIBnodavePLC.WriteBytes(SoftBasic.HexStringToBytes(send));
-                                     _LIBnodavePLC.ReadBytes(length / 2);
-                                    byte[] ReciveData = _LIBnodavePLC.ReadBuff as byte[];
+                                  ret=  _PLCDriver.WriteBytes(SoftBasic.HexStringToBytes(send));
+                                    if (ret != 0)
+                                    {
+                                        SendError(_PLCDriver.ErrorCode);
+                                    }
+                                    _PLCDriver.ReadBytes(length / 2);
+                                    byte[] ReciveData = _PLCDriver.ReadBuff as byte[];
+                                    if (ReciveData==null)
+                                    {
+                           
+                                            SendError(_PLCDriver.ErrorCode);
+                                        
+                                    }
                                     recive = SoftBasic.ByteToHexString(ReciveData);
                                     check = send.Equals(recive);
 
@@ -369,10 +437,10 @@ namespace WindowsFormsApp1
                                     break;
                             }
                             
-                            double during = (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds;
+                            double during = (_PLCDriver.Readtime - _PLCDriver.Sendtime).TotalMilliseconds;
                             //logNet2.RecordMessage(HslMessageDegree.DEBUG, null, "耗时" + (_LIBnodavePLC.Readtime - _LIBnodavePLC.Sendtime).TotalMilliseconds + "字节数" + send.Length.ToString() + "是否正常" + check);
 
-                            _hda.Add(new HistoryData(during, _DataLength, check, DateTime.Now, _LIBnodavePLC.Address));
+                            _hda.Add(new HistoryData(during, _DataLength, check, DateTime.Now, _PLCDriver.Address));
 
                             if (ListData.Count > 10)
                             {
@@ -405,7 +473,7 @@ namespace WindowsFormsApp1
                         }
                         catch(Exception ex)
                         {
-                            MessageEventHandler(_LIBnodavePLC.ErrorCode+ex.Message.ToString(), null);
+                            MessageEventHandler(_PLCDriver.ErrorCode+ex.Message.ToString(), null);
                         }
 { }
                     }
@@ -429,12 +497,16 @@ namespace WindowsFormsApp1
             }
 
         }
+        #endregion
 
+        #region 比较两个数据是否一致
         private bool Check(IEnumerable arr1, IEnumerable arr2)
         {
             return (arr1 as IStructuralEquatable).Equals(arr2, StructuralComparisons.StructuralEqualityComparer);
         }
-        # region 获取随机数组
+        #endregion
+
+        #region 获取随机数组
         public string GetRandomString(int length, bool useNum = true, bool useLow = false, bool useUpp = false)
         {
             byte[] b = new byte[4];
@@ -513,6 +585,7 @@ namespace WindowsFormsApp1
 
         }
 #endregion
+
         /// <summary>
         /// 获取PLC地址参数，IP地址
         /// </summary>
@@ -536,6 +609,18 @@ namespace WindowsFormsApp1
 
 
         }
+        #region 发送错误信息事件
+        private void SendError(string Error)
+        {
+            if (MessageEventHandler != null)
+            {
+                MessageEventHandler(Error, null);
+            }
+
+        }
+        #endregion
+
+        #region 保存数据
         private void SaveData<T>(string TableName, List<T> ts)
         {
             try
@@ -557,7 +642,7 @@ namespace WindowsFormsApp1
                             }
                             catch (Exception ex)
                             {
-                                throw new Exception("BulkInsert调用异常", ex);
+                                throw new Exception("BulkInsert调用异常"+ex.Message, ex);
                             }
                         }
                     }
@@ -572,7 +657,43 @@ namespace WindowsFormsApp1
 
         }
 
+        #region IDisposable Support
+        private bool disposedValue = false; // 要检测冗余调用
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: 释放托管状态(托管对象)。
+                }
+
+                // TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
+                // TODO: 将大型字段设置为 null。
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
+        // ~ThreadingTest()
+        // {
+        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+        //   Dispose(false);
+        // }
+
+        // 添加此代码以正确实现可处置模式。
+        public void Dispose()
+        {
+            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+            Dispose(true);
+            // TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
+        #endregion
 
 
 

@@ -12,6 +12,7 @@ namespace WindowsFormsApp1
 {
   public  static class comm
     {
+        public enum PlcType { HSLCommunication=0,Labnodave=1}
         public  enum DataTyte { BOOL=0, WORD=1,INT16=2,INT32=3,REAL=4,STRING=5 }
 
         public  static readonly string Connection = ConfigurationManager.ConnectionStrings["Conn"].ConnectionString.ToString();

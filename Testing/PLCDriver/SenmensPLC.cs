@@ -10,17 +10,11 @@ using System.Threading.Tasks;
 namespace WindowsFormsApp1
 {
     public class SenmensPLC:IPLC
-    {
-        OperateResult operateResult = null;
-
+    {   
         private SiemensS7Net siemensTcpNet;
         private DateTime _sendTime;
-        private int[] _int32;
-        private ushort[] _Uint16s;
-        private short[] _int16s;
-        private float[] _float;
-        private DateTime _readtime;
-        private byte[] _readBuff;
+        private DateTime   _readtime;
+
         private string _IP;
         private byte[] _reciveDate;
         private bool _closed;
@@ -75,27 +69,28 @@ namespace WindowsFormsApp1
 
         public bool Connect()
         {
-
-            OperateResult connect = siemensTcpNet.ConnectServer();
-            
-            if (connect.IsSuccess)
+            lock (this)
             {
-                return true;
-            }
-            else
-            {
-                ErrorCode = connect.ToMessageShowString();
-                return false;
-               
+                siemensTcpNet.IpAddress = _IP;
+                OperateResult connect = siemensTcpNet.ConnectServer();
+                if (connect.IsSuccess)
+                {
+                    IsConnect = true;
+                    return true;
+                }
+                else
+                {
+                    IsConnect = false;
+                    ErrorCode = connect.ToMessageShowString();
+                    return false;
+                }
             }
         }
 
         public SenmensPLC()
         {
-            siemensTcpNet = new SiemensS7Net(SiemensPLCS.S300);
-            siemensTcpNet.IpAddress = _IP;
+            siemensTcpNet = new SiemensS7Net(SiemensPLCS.S1500);
             siemensTcpNet.ConnectTimeOut = 5000;
-           
 
         }
 
@@ -115,6 +110,7 @@ namespace WindowsFormsApp1
         public int WriteInt32s(Int32[] data)
         {
             List<byte> bytesContent = new List<byte>();
+            _sendTime = DateTime.Now;
             foreach (var item in data)
             {
                 byte[] b = BitConverter.GetBytes(item);
@@ -123,20 +119,10 @@ namespace WindowsFormsApp1
             }
             byte[] bytes = bytesContent.ToArray();
             bytesContent.Clear();
-            return WriteBytes(bytes);
+            return WriteBytes(bytes,true);
 
         }
-
-        private int WriteBytes(byte[] bytes)
-        {
-          OperateResult result=  siemensTcpNet.Write(Address,bytes);
-            if (!result.IsSuccess)
-            {
-                ErrorCode = result.ToMessageShowString();
-                return result.ErrorCode;
-            }
-            return 0;
-        }
+    
 
         public int WriteInt16s(Int16[] data)
         {
@@ -167,6 +153,7 @@ namespace WindowsFormsApp1
             OperateResult result = siemensTcpNet.Write(Address, bytes);
             if (!result.IsSuccess)
             {
+                IsConnect = false;
                 ErrorCode = result.ToMessageShowString();
                 return result.ErrorCode;
               
@@ -246,6 +233,8 @@ namespace WindowsFormsApp1
             if (!result.IsSuccess)
             {
                 ErrorCode = result.ToMessageShowString();
+                IsConnect = false;
+
             }
             _readtime = DateTime.Now;
             ReadBuff = result.Content;
@@ -328,7 +317,7 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
                 return -1;
-                throw;
+                
             }
 
         }
@@ -337,14 +326,15 @@ namespace WindowsFormsApp1
         {
             this.Address=ADD;
             this._IP = IP;
-            siemensTcpNet.IpAddress = _IP;
+            //siemensTcpNet.IpAddress = _IP;
        
             return Connect();
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            siemensTcpNet.ConnectClose();
+            siemensTcpNet = null;
         }
 
       
@@ -356,7 +346,8 @@ namespace WindowsFormsApp1
             if (!result.IsSuccess)
             {
                 ErrorCode = result.ToMessageShowString();
-                return 0xffff;
+                IsConnect = false;
+                return -1;
             }
             _readtime = DateTime.Now;
             ReadBuff = result.Content;

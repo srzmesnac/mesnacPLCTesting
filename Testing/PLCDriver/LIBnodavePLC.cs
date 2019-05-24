@@ -137,6 +137,10 @@ namespace WindowsFormsApp1
                 return _isconnect;
 
             }
+            set
+            {
+                _isconnect = value;
+            }
         }
 
         public string ErrorCode { get ; set ; }
@@ -146,7 +150,7 @@ namespace WindowsFormsApp1
 
             lock (_async)
             {
-                if (!_closed) return true;
+                if (IsConnect) return true;
                 double sec = (DateTime.Now - _closeTime).TotalMilliseconds;
                 if (sec < 6000)
                     System.Threading.Thread.Sleep(6000 - (int)sec);
@@ -172,6 +176,7 @@ namespace WindowsFormsApp1
                 //if (dc != null) dc.disconnectPLC();
                 //libnodave.closeSocket(fds.rfd);
             }
+            IsConnect = false;
             _closed = true;
             return false;
         }
@@ -213,19 +218,21 @@ namespace WindowsFormsApp1
                         if (res != 0)
                         {
                         ErrorCode = daveStrerror(res);
-                        int i = 0;
-                        while (i<3)
-
-                            {
-                              i++;
+                        if (res < 0)
+                        {
                             _isconnect = false;
-                            _closed = true;  _closeTime = DateTime.Now;
-                                this.Connect();
-                                res = dc.readBytes(Device.Area, Device.DBNumber, Start, readLength, buffer);
-                            if (res == 0)
-                               break;
-                                                      
-                            }
+                            //int i = 0;
+                            //while (i < 3)
+                            //{
+                            //    i++;
+                            //    
+                            //    _closed = true; _closeTime = DateTime.Now;
+                            //    this.Connect();
+                            //    res = dc.readBytes(Device.Area, Device.DBNumber, Start, readLength, buffer);
+                            //    if (res == 0)
+                            //        break;
+                            //}
+                        }
                         return res;
                         }
                         bytesContent.AddRange(buffer);
@@ -279,10 +286,21 @@ namespace WindowsFormsApp1
                         if (res != 0)
                         {
                             ErrorCode = daveStrerror(res);
-                            _isconnect = false;
-                            _closed = true;
-                            Connect();
-                            res =  dc.readBytes(Device.Area, Device.DBNumber, Start, readLength, buffer);
+                            if (res < 0)
+                            {
+                                _isconnect = false;
+                                //int i = 0;
+                                //while (i < 3)
+                                //{
+                                //    i++;
+                                //    
+                                //    _closed = true; _closeTime = DateTime.Now;
+                                //    this.Connect();
+                                //    res = dc.readBytes(Device.Area, Device.DBNumber, Start, readLength, buffer);
+                                //    if (res == 0)
+                                //        break;
+                                //}
+                            }
                             
                         }
                         bytesContent.AddRange(buffer);
@@ -338,19 +356,24 @@ namespace WindowsFormsApp1
                         if (res != 0)
                         {
                             ErrorCode = daveStrerror(res);
-
-                            int i = 0;
-
-                            while (i < 3)
+                          
+                            //int i = 0;
+                            if (res<0)
                             {
-                                i++;
-                                _closed = true; _closeTime = DateTime.Now;
-                                Connect();
-                                res = dc.writeBytes(Device.Area, Device.DBNumber, Start, sendBuffer.Length, sendBuffer);
-                                if (res == 0)
-                                    return res;
+                                _isconnect = false;
+                                //while (i < 3)//科发惯用手段数据重传
+                                //{
+                                //    i++;
+                                //    _closed = true; _closeTime = DateTime.Now;
+                                //    Connect();
+                                //    res = dc.writeBytes(Device.Area, Device.DBNumber, Start, sendBuffer.Length, sendBuffer);
+                                //    if (res == 0)
+                                //        return res;
+
+                                //}
 
                             }
+                          
                             return res;
                         }
 
@@ -816,6 +839,7 @@ namespace WindowsFormsApp1
         public void Dispose()
         {
             dc.disconnectPLC();
+            dc = null;
 
         }
 

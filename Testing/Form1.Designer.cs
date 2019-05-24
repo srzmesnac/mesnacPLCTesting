@@ -43,6 +43,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
@@ -66,16 +68,10 @@
             this.txt_log = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
-            this.listDataBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.threadingTestBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.listDataBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.threadingTestBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // Txt_IP
@@ -84,7 +80,8 @@
             this.Txt_IP.Name = "Txt_IP";
             this.Txt_IP.Size = new System.Drawing.Size(103, 21);
             this.Txt_IP.TabIndex = 1;
-            this.Txt_IP.Text = "192.168.0.1";
+            this.Txt_IP.Text = "172.16.209.12";
+            this.Txt_IP.TextChanged += new System.EventHandler(this.Txt_IP_TextChanged);
             // 
             // userLantern1
             // 
@@ -102,7 +99,7 @@
             this.txt_faddr.Name = "txt_faddr";
             this.txt_faddr.Size = new System.Drawing.Size(103, 21);
             this.txt_faddr.TabIndex = 3;
-            this.txt_faddr.Text = "DB4,DBD0";
+            this.txt_faddr.Text = "DB4.0";
             this.txt_faddr.TextChanged += new System.EventHandler(this.Txt_faddr_TextChanged);
             // 
             // label3
@@ -179,7 +176,7 @@
             this.txt_int32addr.Name = "txt_int32addr";
             this.txt_int32addr.Size = new System.Drawing.Size(103, 21);
             this.txt_int32addr.TabIndex = 18;
-            this.txt_int32addr.Text = "DB2,DBD0";
+            this.txt_int32addr.Text = "DB4.0";
             // 
             // label5
             // 
@@ -234,13 +231,37 @@
             this.groupBox1.Controls.Add(this.txt_faddr);
             this.groupBox1.Controls.Add(this.txt_int32addr);
             this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1150, 274);
+            this.groupBox1.Size = new System.Drawing.Size(1186, 274);
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "groupBox1";
             this.groupBox1.Enter += new System.EventHandler(this.GroupBox1_Enter);
+            // 
+            // radioButton2
+            // 
+            this.radioButton2.AutoSize = true;
+            this.radioButton2.Location = new System.Drawing.Point(542, 47);
+            this.radioButton2.Name = "radioButton2";
+            this.radioButton2.Size = new System.Drawing.Size(77, 16);
+            this.radioButton2.TabIndex = 37;
+            this.radioButton2.TabStop = true;
+            this.radioButton2.Text = "Labnodave";
+            this.radioButton2.UseVisualStyleBackColor = true;
+            // 
+            // radioButton1
+            // 
+            this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
+            this.radioButton1.Location = new System.Drawing.Point(542, 25);
+            this.radioButton1.Name = "radioButton1";
+            this.radioButton1.Size = new System.Drawing.Size(41, 16);
+            this.radioButton1.TabIndex = 36;
+            this.radioButton1.TabStop = true;
+            this.radioButton1.Text = "HSL";
+            this.radioButton1.UseVisualStyleBackColor = true;
             // 
             // textBox1
             // 
@@ -380,7 +401,7 @@
             this.txt_int16addr.Name = "txt_int16addr";
             this.txt_int16addr.Size = new System.Drawing.Size(103, 21);
             this.txt_int16addr.TabIndex = 24;
-            this.txt_int16addr.Text = "DB3,DBD0";
+            this.txt_int16addr.Text = "DB4.0";
             // 
             // label9
             // 
@@ -415,32 +436,28 @@
             // 
             // txt_log
             // 
-            this.txt_log.Location = new System.Drawing.Point(26, 39);
+            this.txt_log.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txt_log.Location = new System.Drawing.Point(3, 17);
             this.txt_log.Multiline = true;
             this.txt_log.Name = "txt_log";
             this.txt_log.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txt_log.Size = new System.Drawing.Size(442, 216);
+            this.txt_log.Size = new System.Drawing.Size(1180, 361);
             this.txt_log.TabIndex = 32;
             // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.txt_log);
-            this.groupBox2.Location = new System.Drawing.Point(20, 292);
+            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.groupBox2.Location = new System.Drawing.Point(0, 292);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(483, 363);
+            this.groupBox2.Size = new System.Drawing.Size(1186, 381);
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "groupBox2";
             // 
             // timer2
             // 
             this.timer2.Tick += new System.EventHandler(this.Timer2_Tick);
-            // 
-            // listDataBindingSource
-            // 
-            this.listDataBindingSource.DataMember = "ListData";
-            this.listDataBindingSource.DataSource = this.threadingTestBindingSource;
-            this.listDataBindingSource.CurrentChanged += new System.EventHandler(this.ListDataBindingSource_CurrentChanged);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -456,32 +473,6 @@
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
             // 
-            // radioButton1
-            // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(542, 25);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(41, 16);
-            this.radioButton1.TabIndex = 36;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "HSL";
-            this.radioButton1.UseVisualStyleBackColor = true;
-            // 
-            // radioButton2
-            // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(542, 47);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(77, 16);
-            this.radioButton2.TabIndex = 37;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "Labnodave";
-            this.radioButton2.UseVisualStyleBackColor = true;
-            // 
-            // threadingTestBindingSource
-            // 
-            this.threadingTestBindingSource.DataSource = typeof(WindowsFormsApp1.ThreadingTest);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -490,15 +481,13 @@
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = " ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.listDataBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.threadingTestBindingSource)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -541,8 +530,6 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Timer timer2;
-        private System.Windows.Forms.BindingSource threadingTestBindingSource;
-        private System.Windows.Forms.BindingSource listDataBindingSource;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.RadioButton radioButton2;
